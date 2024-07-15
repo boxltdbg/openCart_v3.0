@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<modification>
+    <name>Модул за доставки на BOX NOW</name>
+    <version>1.0.0</version>
+    <code>boxnow_delivery_service</code>
+    <author>BoxNow</author>
+    <link>https://boxnow.bg/</link>
+    <file path="admin/controller/common/column_left.php">
+        <operation>
+            <search><![CDATA[$report = array();]]></search>
+            <add position="before" offset="1"><![CDATA[
+			// BOXNOW
+			$data['menus'][] = array(
+				'id'       => 'menu-boxnow',
+				'icon'	   => 'fa-archive',
+				'name'	   => 'BoxNow Модул за доставки',
+				'href'     => $this->url->link('extension/shipping/boxnow/report', 'user_token=' . $this->session->data['user_token'], true),
+				'children' => array()
+			);
+        ]]></add>
+        </operation>
+    </file>
+	
+    <file path="catalog/controller/extension/d_quickcheckout/confirm.php">
+        <operation>
+            <search><![CDATA[$json['order_id'] = $this->session->data['order_id'] = $this->updateOrder();]]></search>
+            <add position="after" offset="1"><![CDATA[
+					//BoxNow
+					$this->load->model('extension/shipping/boxnow');
+					$this->load->model('checkout/order');
+					$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+					$boxnow_data = array();
+					if( isset($this->session->data['boxnow_locker_id']) && $order_info['shipping_code'] == 'boxnow.boxnow' ) {
+						$boxnow_data['locker_id'] = $this->session->data['boxnow_locker_id'];
+					};
+					if($order_info['shipping_code']) {
+						$response_delivery = $this->model_extension_shipping_boxnow->setRequest($order_info, $boxnow_data );
+						unset($this->session->data['boxnow_locker_id']);
+						unset($this->session->data['boxnow_address']);
+						unset($this->session->data['boxnow_name']);			
+					}					
+					//BoxNow
+        ]]></add>
+        </operation>
+    </file>	
+	
+    <file path="catalog/controller/checkout/confirm.php">
+        <operation>
+            <search><![CDATA[$this->session->data['order_id'] = $this->model_checkout_order->addOrder($order_data);]]></search>
+            <add position="after" offset="1"><![CDATA[
+					//BoxNow
+					$this->load->model('extension/shipping/boxnow');
+					$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+					$boxnow_data = array();
+					if( isset($this->session->data['boxnow_locker_id']) && $order_info['shipping_code'] == 'boxnow.boxnow' ) {
+						$boxnow_data['locker_id'] = $this->session->data['boxnow_locker_id'];
+					};
+					if($order_info['shipping_code']) {
+						$response_delivery = $this->model_extension_shipping_boxnow->setRequest($order_info, $boxnow_data );
+						unset($this->session->data['boxnow_locker_id']);
+						unset($this->session->data['boxnow_address']);
+						unset($this->session->data['boxnow_name']);			
+					}					
+					//BoxNow
+        ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/extension/quickcheckout/confirm.php">
+        <operation>
+            <search><![CDATA[$this->session->data['order_id'] = $this->model_checkout_order->addOrder($order_data);]]></search>
+            <add position="after" offset="1"><![CDATA[
+					//BoxNow
+					$this->load->model('extension/shipping/boxnow');
+					$order_info = $this->model_checkout_order->getOrder($this->session->data['order_id']);
+					$boxnow_data = array();
+					if( isset($this->session->data['boxnow_locker_id']) && $order_info['shipping_code'] == 'boxnow.boxnow' ) {
+						$boxnow_data['locker_id'] = $this->session->data['boxnow_locker_id'];
+					};
+					if($order_info['shipping_code']) {
+						$response_delivery = $this->model_extension_shipping_boxnow->setRequest($order_info, $boxnow_data );
+						unset($this->session->data['boxnow_locker_id']);
+						unset($this->session->data['boxnow_address']);
+						unset($this->session->data['boxnow_name']);			
+					}						
+					//BoxNow
+        ]]></add>
+        </operation>
+    </file>
+	
+    <file path="catalog/controller/checkout/payment_method.php">
+        <operation>
+            <search><![CDATA[if ($this->config->get('payment_' . $result['code'] . '_status')) {]]></search>
+            <add position="after" offset="1"><![CDATA[
+					//BoxNow
+					if( 
+						$this->config->get('shipping_boxnow_payment_modules') 
+						&& 
+						isset($this->session->data['shipping_method']) 
+						&& 
+						$this->session->data['shipping_method']['code']	== 'boxnow.boxnow' 
+						&& 
+						!in_array($result['code'], $this->config->get('shipping_boxnow_payment_modules')) 
+					) {
+						continue;
+					};
+					//BoxNow
+        ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/controller/extension/quickcheckout/payment_method.php">
+        <operation>
+            <search><![CDATA[if ($this->config->get('payment_' . $result['code'] . '_status')) {]]></search>
+            <add position="after" offset="1"><![CDATA[
+					//BoxNow
+					if( 
+						$this->config->get('shipping_boxnow_payment_modules') 
+						&& 
+						isset($this->session->data['shipping_method']) 
+						&& 
+						$this->session->data['shipping_method']['code']	== 'boxnow.boxnow' 
+						&& 
+						!in_array($result['code'], $this->config->get('shipping_boxnow_payment_modules')) 
+					) {
+						continue;
+					};
+					//BoxNow
+        ]]></add>
+        </operation>
+    </file>
+	
+    <file path="catalog/model/extension/d_quickcheckout/method.php">
+        <operation>
+            <search><![CDATA[if ($this->config->get('payment_'.$result['code'] . '_status')) {]]></search>
+            <add position="after" offset="1"><![CDATA[
+					//BoxNow
+					if( 
+						$this->config->get('shipping_boxnow_payment_modules') 
+						&& 
+						isset($this->session->data['shipping_method']) 
+						&& 
+						$this->session->data['shipping_method']['code']	== 'boxnow.boxnow' 					
+						&& 
+						!in_array($result['code'], $this->config->get('shipping_boxnow_payment_modules')) 
+					) {
+						continue;
+					};
+					//BoxNow
+        ]]></add>
+        </operation>
+    </file>
+	
+    <file path="catalog/controller/checkout/shipping_method.php">
+        <operation>
+            <search><![CDATA[if (!isset($this->request->post['shipping_method'])) {]]></search>
+            <add position="before" offset="1"><![CDATA[
+		//BOXNOW
+		$this->load->language('extension/shipping/boxnow');
+		if (isset($this->request->post['shipping_method']) && $this->request->post['shipping_method'] == 'boxnow.boxnow') {
+			if (!isset($this->session->data['boxnow_locker_id']) || !$this->session->data['boxnow_locker_id']) {
+				$json['error']['warning'] = $this->language->get('error_boxnow');
+			}
+		}
+        ]]></add>
+        </operation>
+        <operation>
+           <search trim="true|false"><![CDATA[$this->load->language('checkout/checkout');]]></search>
+            <add position="after" offset="1"><![CDATA[
+		//BOXNOW
+		$this->load->language('extension/shipping/boxnow');
+		
+		$data['boxnow_address'] = '';
+		$data['boxnow_name'] = '';
+		$data['selected_boxnow'] 	= $this->language->get('selected_boxnow');
+		
+		if( 
+		isset($this->session->data['boxnow_address'])
+		&& 
+		$this->session->data['boxnow_address']
+		&&		
+		isset($this->session->data['boxnow_name'])
+		&& 
+		$this->session->data['boxnow_name']			
+		) {
+			$data['boxnow_address'] = $this->session->data['boxnow_address'];
+			$data['boxnow_name'] 	= $this->session->data['boxnow_name'];
+		};
+		
+		$data['partner_id'] = $this->config->get('shipping_boxnow_partner_id');
+		$data['shipping_address'] = isset($this->session->data['shipping_address']) ? $this->session->data['shipping_address'] : null;
+		//BOXNOW
+        ]]></add>
+        </operation>
+    </file>	
+	
+    <file path="catalog/controller/extension/quickcheckout/shipping_method.php">
+        <operation>
+            <search><![CDATA[if (!isset($this->request->post['shipping_method'])) {]]></search>
+            <add position="before" offset="1"><![CDATA[
+		//BOXNOW
+		$this->load->language('extension/shipping/boxnow');
+		if (isset($this->request->post['shipping_method']) && $this->request->post['shipping_method'] == 'boxnow.boxnow') {
+			if (!isset($this->session->data['boxnow_locker_id']) || !$this->session->data['boxnow_locker_id']) {
+				$json['error']['warning'] = $this->language->get('error_boxnow');
+			}
+		}
+        ]]></add>
+        </operation>
+        <operation>
+            <search trim="true|false"><![CDATA[$this->load->language('checkout/checkout');]]></search>
+            <add position="after" offset="1"><![CDATA[
+		//BOXNOW
+		$this->load->language('extension/shipping/boxnow');
+			
+		$data['boxnow_address'] = '';
+		$data['boxnow_name'] = '';
+		$data['selected_boxnow'] 	= $this->language->get('selected_boxnow');
+		
+		if( 
+		isset($this->session->data['boxnow_address'])
+		&& 
+		$this->session->data['boxnow_address']
+		&&		
+		isset($this->session->data['boxnow_name'])
+		&& 
+		$this->session->data['boxnow_name']			
+		) {
+			$data['boxnow_address'] = $this->session->data['boxnow_address'];
+			$data['boxnow_name'] 	= $this->session->data['boxnow_name'];
+		};
+
+		$data['partner_id'] = $this->config->get('shipping_boxnow_partner_id');
+		$data['shipping_address'] = isset($this->session->data['shipping_address']) ? $this->session->data['shipping_address'] : null;
+		//BOXNOW
+        ]]></add>
+        </operation>
+    </file>
+
+    <file path="catalog/controller/extension/d_quickcheckout/shipping_method.php">
+        <operation>
+            <search><![CDATA[if (isset($this->request->post['shipping_method'])) {]]></search>
+            <add position="before" offset="1"><![CDATA[
+		//BOXNOW
+		$this->load->language('extension/shipping/boxnow');
+		if (isset($this->request->post['shipping_method']) && $this->request->post['shipping_method'] == 'boxnow.boxnow') {
+			if (!isset($this->session->data['boxnow_locker_id']) || !$this->session->data['boxnow_locker_id']) {
+				 $json['shipping_error'] = $this->language->get('error_boxnow');
+			}
+		}
+        ]]></add>
+        </operation>
+        <operation>
+            <search trim="true|false"><![CDATA[$this->load->model('extension/module/d_quickcheckout');]]></search>
+            <add position="after" offset="1"><![CDATA[
+		//BOXNOW
+		$this->load->language('extension/shipping/boxnow');
+		
+		$data['boxnow_address'] = '';
+		$data['boxnow_name'] = '';
+		$data['selected_boxnow'] 	= $this->language->get('selected_boxnow');
+		
+		if( 
+		isset($this->session->data['boxnow_address'])
+		&& 
+		$this->session->data['boxnow_address']
+		&&		
+		isset($this->session->data['boxnow_name'])
+		&& 
+		$this->session->data['boxnow_name']			
+		) {
+			$data['boxnow_address'] = $this->session->data['boxnow_address'];
+			$data['boxnow_name'] 	= $this->session->data['boxnow_name'];
+		};
+		
+		$data['partner_id'] = $this->config->get('shipping_boxnow_partner_id');
+		$data['shipping_address'] = isset($this->session->data['shipping_address']) ? $this->session->data['shipping_address'] : null;
+		//BOXNOW
+        ]]></add>
+        </operation>
+    </file>
+
+
+    <file path="catalog/view/theme/default/template/d_quickcheckout/shipping_method.twig">
+        <operation>
+			<search regex="true" limit="1"><![CDATA[</select>]]></search>
+            <add position="after" offset="1"><![CDATA[
+	{% for key,shipping_method in shipping_methods %}
+		{% if not shipping_method.error %} 
+			{% for quote in shipping_method.quote %} 
+			
+				{% if quote.code == 'boxnow.boxnow' %}
+			
+					<div class="boxnow-iframe-window" id="boxnow-iframe-window" style="min-height: 600px;display:none;width:100%;margin-top:15px;margin-bottom:15px;">
+						<div class="alert alert-info" style="margin-bottom:1rem;margin-top:1rem">
+							{{ text_select_lockerid }}
+						</div>
+						<div id="boxnowmap" style="width:100%; height:600px;"></div>
+						<script type="text/javascript">
+						var _bn_map_widget_config = {
+							partnerId: '{{ partner_id }}',
+							zip: '{{ shipping_address.postcode }}',
+							autoshow: true,
+							parentElement: "#boxnowmap",
+							afterSelect: function(selected){
+								if (selected.boxnowLockerId !== undefined) {
+									$.ajax({
+										type: "POST",
+										url: "index.php?route=extension/shipping/boxnow/setLockerSession",
+										data: {locker_id:selected.boxnowLockerId,locker_address:selected.boxnowLockerAddressLine1,locker_name:selected.boxnowLockerName},
+										success: function(data){
+											$('#bownow_messages').html('<div class="alert alert-success">{{ selected_boxnow }} '+selected.boxnowLockerAddressLine1+' ['+selected.boxnowLockerName+']</div>');
+										},
+										error: function(xhr, status, error){
+										}
+									});
+								}
+							}
+						};
+						(function(d){var e = d.createElement("script");e.src = "https://widget-cdn.boxnow.bg/map-widget/client/v4.js";e.async = true;e.defer = true;d.getElementsByTagName("head")[0].appendChild(e);})(document);
+						</script>
+						<div id="bownow_messages" style="margin-top:1rem;">
+							{% if boxnow_address and boxnow_name %}
+								<div class="alert alert-success">
+									{{ selected_boxnow }} {{ boxnow_address }} [{{ boxnow_name }}]
+								</div>
+							{% endif %}
+						</div>
+						 <!-- <div class="alert alert-success">
+                        {{ text_shipping_cost }}: {{ quote.cost }}
+                    </div> -->
+					</div>
+					<input name="boxnow_locker_id" id="boxnow_locker_id" type="hidden" value="">
+					<script>
+							$(document).ready(function() {
+								$("input[type=radio][name=shipping_method]:checked").each(function() {
+									if (this.value == "boxnow.boxnow") {
+										$("#boxnow-iframe-window").fadeIn("200");
+									} else {
+										$("#boxnow-iframe-window").fadeOut("200");
+									};
+								});
+							});
+							$(document).on("change","select[name=shipping_method]",function(e){
+								if (this.value == "boxnow.boxnow") {
+									$("#boxnow-iframe-window").fadeIn("200");
+								} else {
+									$("#boxnow-iframe-window").fadeOut("200");
+								};
+							});
+					</script>
+
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endfor %}
+        ]]></add>
+        </operation>
+    </file>	
+	
+    <file path="catalog/view/theme/*/template/extension/quickcheckout/shipping_method.twig">
+        <operation>
+			<search regex="true" limit="1"><![CDATA[($)]]></search>
+            <add position="after" offset="1"><![CDATA[
+{% for key,shipping_method in shipping_methods %}
+	{% if not shipping_method.error %} 
+		{% for quote in shipping_method.quote %} 
+		
+			{% if quote.code == 'boxnow.boxnow' %}
+		
+				<div class="boxnow-iframe-window" id="boxnow-iframe-window" style="min-height: 600px;display:none;width:100%;margin-top:15px;margin-bottom:15px;">
+					<div class="alert alert-info" style="margin-bottom:1rem;margin-top:1rem">
+						{{ text_select_lockerid }}
+					</div>
+					<div id="boxnowmap" style="width:100%; height:600px;"></div>
+					<script type="text/javascript">
+					var _bn_map_widget_config = {
+						partnerId: '{{ partner_id }}',
+						zip: '{{ shipping_address.postcode }}',
+						autoshow: true,
+						parentElement: "#boxnowmap",
+						afterSelect: function(selected){
+							if (selected.boxnowLockerId !== undefined) {
+								$.ajax({
+									type: "POST",
+									url: "index.php?route=extension/shipping/boxnow/setLockerSession",
+									data: {locker_id:selected.boxnowLockerId,locker_address:selected.boxnowLockerAddressLine1,locker_name:selected.boxnowLockerName},
+									success: function(data){
+										$('#bownow_messages').html('<div class="alert alert-success">{{ selected_boxnow }} '+selected.boxnowLockerAddressLine1+' ['+selected.boxnowLockerName+']</div>');
+									},
+									error: function(xhr, status, error){
+									}
+								});
+							}
+						}
+					};
+					(function(d){var e = d.createElement("script");e.src = "https://widget-cdn.boxnow.bg/map-widget/client/v4.js";e.async = true;e.defer = true;d.getElementsByTagName("head")[0].appendChild(e);})(document);
+					</script>
+					<div id="bownow_messages" style="margin-top:1rem;">
+						{% if boxnow_address and boxnow_name %}
+							<div class="alert alert-success">
+								{{ selected_boxnow }} {{ boxnow_address }} [{{ boxnow_name }}]
+							</div>
+						{% endif %}
+					</div>
+				</div>
+				<input name="boxnow_locker_id" id="boxnow_locker_id" type="hidden" value="">
+				<script>
+						$(document).ready(function() {
+							$("input[type=radio][name=shipping_method]:checked").each(function() {
+								if (this.value == "boxnow.boxnow") {
+									$("#boxnow-iframe-window").fadeIn("200");
+								} else {
+									$("#boxnow-iframe-window").fadeOut("200");
+								};
+							});
+						});
+						$(document).on("change","input[type=radio][name=shipping_method]",function(e){
+							if (this.value == "boxnow.boxnow") {
+								$("#boxnow-iframe-window").fadeIn("200");
+							} else {
+								$("#boxnow-iframe-window").fadeOut("200");
+							};
+						});
+				</script>
+			{% endif %}
+		{% endfor %}
+	{% endif %}
+{% endfor %}
+        ]]></add>
+        </operation>
+    </file>
+    <file path="catalog/view/theme/*/template/checkout/shipping_method.twig">
+        <operation>
+			<search><![CDATA[text_comments]]></search>
+            <add position="before" offset="1"><![CDATA[
+{% if shipping_methods %}
+	{% for key,shipping_method in shipping_methods %}
+		{% if not shipping_method.error %} 
+			{% for quote in shipping_method.quote %} 	
+
+				{% if quote.code == 'boxnow.boxnow' %}
+			
+					<div class="boxnow-iframe-window" id="boxnow-iframe-window" style="min-height: 600px;display:none;width:100%;margin-top:15px;margin-bottom:15px;">
+						<div class="alert alert-info" style="margin-bottom:1rem;margin-top:1rem">
+							{{ text_select_lockerid }}
+						</div>					
+						<div id="boxnowmap" style="width:100%; height:600px;"></div>
+						<script type="text/javascript">
+						var _bn_map_widget_config = {
+							partnerId: '{{ partner_id }}',
+							zip: '{{ shipping_address.postcode }}',
+							autoshow: true,
+							parentElement: "#boxnowmap",
+							afterSelect: function(selected){
+								if (selected.boxnowLockerId !== undefined) {
+									$.ajax({
+										type: "POST",
+										url: "index.php?route=extension/shipping/boxnow/setLockerSession",
+										data: {locker_id:selected.boxnowLockerId,locker_address:selected.boxnowLockerAddressLine1,locker_name:selected.boxnowLockerName},
+										success: function(data){
+											$('#bownow_messages').html('<div class="alert alert-success">{{ selected_boxnow }} '+selected.boxnowLockerAddressLine1+' ['+selected.boxnowLockerName+']</div>');
+										},
+										error: function(xhr, status, error){
+										}
+									});
+								}
+							}
+						};
+						(function(d){var e = d.createElement("script");e.src = "https://widget-cdn.boxnow.bg/map-widget/client/v4.js";e.async = true;e.defer = true;d.getElementsByTagName("head")[0].appendChild(e);})(document);
+						</script>
+						<div id="bownow_messages" style="margin-top:1rem;">
+							{% if boxnow_address and boxnow_name %}
+								<div class="alert alert-success">
+									{{ selected_boxnow }} {{ boxnow_address }} [{{ boxnow_name }}]
+								</div>
+							{% endif %}
+						</div>
+					</div>
+					<input name="boxnow_locker_id" id="boxnow_locker_id" type="hidden" value="">
+					<script>
+							$(document).ready(function() {
+								$("input[type=radio][name=shipping_method]:checked").each(function() {
+									if (this.value == "boxnow.boxnow") {
+										$("#boxnow-iframe-window").fadeIn("200");
+									} else {
+										$("#boxnow-iframe-window").fadeOut("200");
+									};
+								});
+							});
+							$(document).on("change","input[type=radio][name=shipping_method]",function(e){
+								if (this.value == "boxnow.boxnow") {
+									$("#boxnow-iframe-window").fadeIn("200");
+								} else {
+									$("#boxnow-iframe-window").fadeOut("200");
+								};
+							});
+					</script>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+	{% endfor %}
+{% endif %}
+        ]]></add>
+        </operation>
+    </file>
+</modification>
